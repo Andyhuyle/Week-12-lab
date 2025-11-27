@@ -1,0 +1,47 @@
+---
+title: "run_optimization"
+author: "Andy + Ren"
+format: pdf
+---
+
+Import libraries and functions
+```{r}
+library(dplyr)
+library(ggplot2)
+
+source("scripts/estimate_arrival_rates.R")
+source("scripts/simulation.R")
+source("scripts/allocations.R")
+source("scripts/visualize_demand.R")
+```
+
+Run optimization workflow
+```{r}
+fleet_sizes = c(50, 100, 200)
+
+#1. read in the historical data
+historical_bike_data <- read.csv("~/Desktop/Datascience in R/Week-12-lab/data/sample_bike.csv")
+
+#2. estimate the hourly arrival rates for each pair of stations
+arrival_rates <- estimate_arrival_rates(historical_bike_data)
+
+#3. simulate bike demand for a number of trials (aka days)
+for (i in 1:length(fleet_sizes)) {
+  starting_bike_distribution <- allocate_initial(bike_data = historical_bike_data, 
+                                               total_bikes = fleet_sizes[i])
+  demand_data <- simulate_demand(arrival_rates = arrival_rates, 
+                                 initial_placements = starting_bike_distribution, 
+                                 trials = 100)
+  
+  #4. place bikes according demand distribution
+  final_placements <- allocate_final(df = demand_data, 
+                                     total_bikes = fleet_sizes[i], 
+                                     min_bikes = 3)
+  
+  #5. save and visualize placements
+  write.csv(final_placements, file = file.path("results", paste0(i, "_final_placements.csv")), row.names = FALSE)
+  p <- visualize_demand(final_placements)
+  ggsave(file.path("results", paste0(i, "_optimal_bike_placement.png")), p, width = 8, height = 6)
+}
+```
+
