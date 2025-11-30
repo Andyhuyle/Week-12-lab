@@ -1,3 +1,5 @@
+# Test for estimate_arrival_rates
+
 test_that("Arrival rates is correctly computed", {
   df_prime <- tibble(
     start_station = c("R", "A"),
