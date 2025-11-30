@@ -1,3 +1,5 @@
+# Test for visualize_demand()
+
 test_that("visualize_demand returns a ggplot with correct data", {
   # minimal example input
   sample_final <- data.frame(
